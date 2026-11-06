@@ -2,6 +2,8 @@ import QtQuick
 import QtQuick.Layouts
 import QtTest
 
+import StatusQ
+import StatusQ.Core.Theme
 import StatusQ.Components
 
 import Models
@@ -18,6 +20,13 @@ import Models
 Item {
     id: root
 
+    readonly property ChatTextAppearance textAppearance: MessageTextAppearance {
+        theme: root.Theme
+    }
+    readonly property ChatTextAppearance previewAppearance: ReplyTextAppearance {
+        theme: root.Theme
+    }
+
     width: 600
     height: 800
 
@@ -29,6 +38,8 @@ Item {
             columns: 1
 
             StatusMessage {
+                textAppearance: root.textAppearance
+                previewAppearance: root.previewAppearance
                 objectName: "albumMessage"
 
                 Layout.fillWidth: true

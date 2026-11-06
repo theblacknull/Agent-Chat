@@ -3,6 +3,8 @@ import QtQuick.Controls
 import QtTest
 import Storybook.Testing
 
+import StatusQ.Components
+import StatusQ.Core.Theme
 import StatusQ
 
 import SortFilterProxyModel
@@ -25,6 +27,13 @@ import AppLayouts.Chat.stores as ChatStores
 */
 Item {
     id: root
+
+    readonly property ChatTextAppearance textAppearance: MessageTextAppearance {
+        theme: root.Theme
+    }
+    readonly property ChatTextAppearance previewAppearance: ReplyTextAppearance {
+        theme: root.Theme
+    }
 
     width: 800
     height: 600
@@ -234,6 +243,8 @@ Item {
         id: viewComp
 
         ChatMessagesView {
+            textAppearance: root.textAppearance
+            previewAppearance: root.previewAppearance
             width: root.width
             height: root.height
 
@@ -399,6 +410,8 @@ Item {
             for (const r of rows) {
                 compare(r.content.parent, r.shell, "the item is on screen, in its row")
                 compare(r.content.objectName, "chatMessageViewDelegate")
+                compare(r.content.textAppearance, root.textAppearance)
+                compare(r.content.previewAppearance, root.previewAppearance)
             }
 
             // the item shows the message of its row
@@ -438,6 +451,64 @@ Item {
 
             compare(readyCount(), ready - (rows.length - 1),
                     "the identifier row took no pooled item")
+        }
+
+        function chatTextItems(item, out) {
+            out = out || []
+            for (const child of item.children) {
+                if (typeof child.selectAll === "function" && child.segments !== undefined)
+                    out.push(child)
+                chatTextItems(child, out)
+            }
+            return out
+        }
+
+        // A row parked and reused for identical text (setSegments returns
+        // early then) comes back without the old selection.
+        function test_reusedRowWithIdenticalTextKeepsNoSelection() {
+            for (let i = 0; i < messagesA.count; ++i)
+                messagesA.setProperty(i, "unparsedText", "ok")
+            prewarmedPool()
+            const view = openView()
+            const original = rowItems(view).map(row => row.content)
+            for (const content of original)
+                for (const text of chatTextItems(content))
+                    text.selectAll()
+            verify(original.some(content => chatTextItems(content).some(t => t.selectedText === "ok")))
+
+            view.visible = false
+            tryCompare(view.chatLogView, "rowCount", 0, 5000)
+            view.visible = true
+            settle(view)
+
+            const rows = rowItems(view)
+            verify(rows.some(row => original.indexOf(row.content) >= 0), "a pooled row was reused")
+            for (const row of rows)
+                for (const text of chatTextItems(row.content))
+                    compare(text.selectedText, "")
+        }
+
+        function test_reusedRowsReceiveTheCurrentAppearances() {
+            prewarmedPool()
+            const view = openView()
+            const original = rowItems(view).map(row => row.content)
+            view.visible = false
+            tryCompare(view.chatLogView, "rowCount", 0, 5000)
+            // The app-owned instances remain valid after the view releases its rows.
+            for (const item of original) {
+                compare(item.textAppearance, root.textAppearance)
+                compare(item.previewAppearance, root.previewAppearance)
+            }
+            view.textAppearance = root.previewAppearance
+            view.previewAppearance = root.textAppearance
+            view.visible = true
+            settle(view)
+            const rows = rowItems(view)
+            verify(rows.some(row => original.indexOf(row.content) >= 0), "a pooled row was reused")
+            for (const row of rows) {
+                compare(row.content.textAppearance, root.previewAppearance)
+                compare(row.content.previewAppearance, root.textAppearance)
+            }
         }
 
         // Fewer items ready than the window wants: the rows wait for the pool

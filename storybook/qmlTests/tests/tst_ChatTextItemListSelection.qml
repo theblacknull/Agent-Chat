@@ -1,8 +1,9 @@
 import QtQuick
 import QtTest
+import "ChatTextTestUtils.js" as ChatTextTestUtils
 
+import StatusQ
 import StatusQ.Core
-import StatusQ.Components
 
 // A mouse text-selection drag inside a scrollable list (the chat's `StatusListView`) must
 // extend the selection without the list scrolling underneath: a `Flickable` starts dragging
@@ -31,28 +32,38 @@ Item {
 
             delegate: Item {
                 width: listView.width
-                implicitHeight: textView.implicitHeight + 10
+                implicitHeight: textItem.implicitHeight + 10
 
-                ChatTextView {
-                    id: textView
+                ChatTextItem {
+                    appearance: ChatTextAppearance {
+                        font.pixelSize: 15
+                    }
+
+                    id: textItem
 
                     width: parent.width
                     selectable: true
-                    font.pixelSize: 15
-                    blocks: [
-                        { type: "text", html: "Msg " + index + " line one here" },
-                        { type: "text", html: "Msg " + index + " line two here" },
-                        { type: "text", html: "Msg " + index + " line three here" }
+                    segments: [
+                        {text: "Msg " + index + " line one here"},
+                        {text: "Msg " + index + " line two here", newBlock: true},
+                        {text: "Msg " + index + " line three here", newBlock: true}
                     ]
 
-                    Component.onCompleted: listView.views[index] = textView
+                    Component.onCompleted: listView.views[index] = textItem
                 }
             }
         }
     }
 
     TestCase {
-        name: "ChatTextViewListSelection"
+        id: testCase
+
+        readonly property var appearanceProperties: ChatTextTestUtils.appearanceProperties
+        property list<chatTextSegment> initialSegments
+        function createStyledTemporary(component, parent, properties) {
+            return ChatTextTestUtils.create(testCase, component, parent, properties)
+        }
+        name: "ChatTextItemListSelection"
         when: windowShown
 
         // Drives a drag as a sequence of moves, synchronising on rendering instead of
@@ -63,7 +74,8 @@ Item {
             const dy = (toY - fromY) / step
             for (let i = 1; i <= step; ++i) {
                 mouseMove(listView, fromX + dx * i, fromY + dy * i)
-                waitForRendering(listView)
+                listView.Window.window.update()
+                verify(waitForRendering(listView))
             }
         }
 
@@ -74,7 +86,7 @@ Item {
         }
 
         function test_selectionDragDoesNotScrollTheList() {
-            const listView = createTemporaryObject(componentUnderTest, root)
+            const listView = createStyledTemporary(componentUnderTest, root)
             verify(listView)
             tryVerify(() => !!listView.views[0] && listView.views[0].implicitHeight > 0)
             // Let the list settle at its initial position before sampling it.
@@ -97,7 +109,7 @@ Item {
 
         // Suspending the list while selecting must not leave it permanently unscrollable.
         function test_listStaysScrollableAfterSelectionDrag() {
-            const listView = createTemporaryObject(componentUnderTest, root)
+            const listView = createStyledTemporary(componentUnderTest, root)
             verify(listView)
             tryVerify(() => !!listView.views[0] && listView.views[0].implicitHeight > 0)
             tryVerify(() => !listView.moving)

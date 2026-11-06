@@ -1,6 +1,10 @@
 import QtQuick
 import QtTest
 
+import StatusQ
+import StatusQ.Components
+import StatusQ.Core.Theme
+
 import utils
 
 import shared.views.chat
@@ -53,6 +57,13 @@ import AppLayouts.Chat.stores as ChatStores
 */
 Item {
     id: root
+
+    readonly property ChatTextAppearance textAppearance: MessageTextAppearance {
+        theme: root.Theme
+    }
+    readonly property ChatTextAppearance previewAppearance: ReplyTextAppearance {
+        theme: root.Theme
+    }
 
     width: 800
     height: 600
@@ -132,6 +143,8 @@ Item {
         id: messageViewComp
 
         MessageView {
+            textAppearance: root.textAppearance
+            previewAppearance: root.previewAppearance
             width: 600
 
             rootStore: rootStoreMock

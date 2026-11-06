@@ -47,6 +47,8 @@ StatusSectionLoader {
     required property HandlersManagerLoader popupHandler
     property SortFilterProxyModel reactionEmojiModel
     property DelegatePool rowPool: null
+    required property ChatTextAppearance textAppearance
+    required property ChatTextAppearance previewAppearance
 
     // Inputs
     required property bool createChatViewOpened
@@ -280,6 +282,8 @@ StatusSectionLoader {
             navToMsgList:                   Qt.binding(() => root.rootStore.navToMsgList),
             leftPanelWidthOverride:         Qt.binding(() => root.leftPanelWidthOverride),
             rowPool:                        Qt.binding(() => root.rowPool),
+            textAppearance:                 Qt.binding(() => root.textAppearance),
+            previewAppearance:              Qt.binding(() => root.previewAppearance),
         })
     }
 

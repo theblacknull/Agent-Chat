@@ -1,6 +1,8 @@
 import QtQuick
 import QtTest
 
+import StatusQ
+import StatusQ.Core.Theme
 import StatusQ.Components
 
 // Hover reporting must be exclusive to real pointing devices. A touch tap makes Qt synthesize
@@ -8,6 +10,14 @@ import StatusQ.Components
 // quick-actions context menu on top of the long-press one.
 Item {
     id: root
+
+    readonly property ChatTextAppearance textAppearance: MessageTextAppearance {
+        theme: root.Theme
+    }
+    readonly property ChatTextAppearance previewAppearance: ReplyTextAppearance {
+        theme: root.Theme
+    }
+
     width: 600
     height: 400
 
@@ -15,6 +25,8 @@ Item {
         id: componentUnderTest
 
         StatusMessage {
+            textAppearance: root.textAppearance
+            previewAppearance: root.previewAppearance
             width: 500
             messageId: "m1"
             messageDetails: StatusMessageDetails {

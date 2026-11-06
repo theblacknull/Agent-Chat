@@ -44,6 +44,8 @@ Item {
     property ChatStores.CreateChatPropertiesStore createChatPropertiesStore
     property SortFilterProxyModel reactionEmojiModel
     property DelegatePool rowPool: null
+    property ChatTextAppearance textAppearance
+    property ChatTextAppearance previewAppearance
     property bool areTestNetworksEnabled
 
     /*
@@ -657,6 +659,8 @@ Item {
 
                 rootStore: root.rootStore
                 rowPool: root.rowPool
+                textAppearance: root.textAppearance
+                previewAppearance: root.previewAppearance
                 formatBalance: d.formatBalance
                 reactionEmojiModel: root.reactionEmojiModel
                 stickersLoaded: root.stickersLoaded

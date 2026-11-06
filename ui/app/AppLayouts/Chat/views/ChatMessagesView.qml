@@ -57,6 +57,8 @@ Item {
     // The app-wide reservoir of pre-built rows; without one every row is built
     // on demand.
     property DelegatePool rowPool: null
+    property ChatTextAppearance textAppearance
+    property ChatTextAppearance previewAppearance
 
     // Users related data:
     property var usersModel
@@ -622,7 +624,7 @@ Item {
             "chatLogView", "chatContentModule", "formatBalance", "usersModel",
             "isChatBlocked", "joined", "sendViaPersonalChatEnabled",
             "messageLinkSharingEnabled", "threadsFeatureEnabled", "isThreadView",
-            "disabledTooltipText",
+            "disabledTooltipText", "textAppearance", "previewAppearance",
             "areTestNetworksEnabled", "extraLeftPadding", "gifUnfurlingEnabled",
             "neverAskAboutUnfurlingAgain", "myPublicKey", "stickersLoaded"
         ]

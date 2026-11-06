@@ -17,6 +17,9 @@ import "./private/statusMessage"
 Control {
     id: root
 
+    property ChatTextAppearance textAppearance
+    property ChatTextAppearance previewAppearance
+
     enum ContentType {
         Unknown = 0,
         Text = 1,
@@ -226,6 +229,7 @@ Control {
                 active: d.replyShown || root.keepOptionalPartsLoaded
                 visible: d.replyShown
                 sourceComponent: StatusMessageReply {
+                    appearance: root.previewAppearance
                     objectName: "StatusMessage_replyDetails"
                     isMobile: root.isMobile
                     replyDetails: root.replyDetails
@@ -532,6 +536,7 @@ Control {
         disabledTooltipText: root.disabledTooltipText
         isMobile: root.isMobile
         clearSelectionOnLostFocus: root.clearSelectionOnLostFocus
+        appearance: root.textAppearance
         onLinkActivated: link => root.linkActivated(link)
         onHoveredLinkChanged: root.hoveredLink = hoveredLink
         onSelectedTextChanged: d.selectedText = selectedText

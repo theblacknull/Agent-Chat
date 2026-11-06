@@ -1,5 +1,7 @@
 #pragma once
 
+#include "StatusQ/chattextsegment.h"
+
 #include <QFont>
 #include <QObject>
 #include <QString>
@@ -7,8 +9,15 @@
 #include <QVariantList>
 #include <QVariantMap>
 
+#include <memory>
+
+namespace Markdown { struct Node; }
+
 // Stateless QML singleton exposing the Markdown parser's debug/inspection
 // helpers (the textual AST dump) and the static AST→HTML renderer to QML.
+// Stateless as far as observable behavior goes: every result depends only on
+// the arguments. Internally it keeps a one-entry parse cache for performance
+// (see parsed()).
 class MarkdownUtils : public QObject
 {
     Q_OBJECT
@@ -62,6 +71,11 @@ public:
     // resolved from `mentions` as in toBlocks. See Markdown::toPlainText.
     Q_INVOKABLE QString plainText(const QString& text, const QVariantMap& mentions = {}) const;
 
+    // Logical spans for chat renderers; appearance is resolved by each item. The
+    // first segment carries sourceIsOnlyEmoji, classified from the original text.
+    Q_INVOKABLE QList<ChatTextSegment> toChatTextSegments(const QString& text, const QVariantMap& mentions = {},
+                                    bool formatUnclosedCodeFence = false) const;
+
     // True when `text` contains at least one emoji code point. See Markdown::clusterHasEmoji.
     Q_INVOKABLE bool hasEmoji(const QString& text) const;
 
@@ -69,4 +83,16 @@ public:
     // (e.g. "0x04ab…", "0x00001"). Parsed via the Markdown AST, so "@0x…" tokens inside
     // code spans/blocks are excluded. Empty when there are none.
     Q_INVOKABLE QStringList mentions(const QString& text) const;
+
+private:
+    // A message view asks for the mentions and then the segments of one
+    // source in consecutive bindings. The last tree is kept so they share one
+    // parse; it is the only state, and it is never observable. Very long
+    // texts are not kept.
+    std::shared_ptr<const Markdown::Node> parsed(const QString& text,
+                                                 bool formatUnclosedCodeFence = false) const;
+
+    mutable QString m_lastText;
+    mutable bool m_lastFormatUnclosedCodeFence = false;
+    mutable std::shared_ptr<const Markdown::Node> m_lastTree;
 };

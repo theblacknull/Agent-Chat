@@ -5,6 +5,8 @@ import QtQuick.Layouts
 import utils
 import shared.views.chat
 
+import StatusQ
+import StatusQ.Components
 import StatusQ.Core.Theme
 
 // A bare MessageView driven by plain property values only — no model, no
@@ -12,6 +14,15 @@ import StatusQ.Core.Theme
 // set, the way the row pool's rebind does.
 SplitView {
     id: root
+
+    readonly property ChatTextAppearance textAppearance: MessageTextAppearance {
+        theme: root.Theme
+        selectionPalette: root.palette
+    }
+    readonly property ChatTextAppearance previewAppearance: ReplyTextAppearance {
+        theme: root.Theme
+        selectionPalette: root.palette
+    }
 
     QtObject {
         id: d
@@ -118,6 +129,8 @@ SplitView {
 
         MessageView {
             id: messageView
+            textAppearance: root.textAppearance
+            previewAppearance: root.previewAppearance
 
             width: parent.width
 

@@ -65,6 +65,16 @@ import MobileUI
 Item {
     id: appMain
 
+    // These instances outlive the pooled rows that borrow them.
+    readonly property ChatTextAppearance textAppearance: MessageTextAppearance {
+        theme: appMain.Theme
+        selectionPalette: appMain.ApplicationWindow.window?.palette ?? systemPalette
+    }
+    readonly property ChatTextAppearance previewAppearance: ReplyTextAppearance {
+        theme: appMain.Theme
+        selectionPalette: appMain.ApplicationWindow.window?.palette ?? systemPalette
+    }
+
     focus: true
     Component.onCompleted: {
         // Ensure the app is focused on start to properly receive key events
@@ -2421,6 +2431,8 @@ Item {
                         popupHandler: popupRequestsHandler
                         reactionEmojiModel: skinToneEmojiModel
                         rowPool: appMain.messageRowPool
+                        textAppearance: appMain.textAppearance
+                        previewAppearance: appMain.previewAppearance
 
                         createChatViewOpened: createChatView.opened
                         isPortraitMode: appMain.isPortraitMode
@@ -2626,6 +2638,8 @@ Item {
                             popupHandler: popupRequestsHandler
                             reactionEmojiModel: skinToneEmojiModel
                             rowPool: appMain.messageRowPool
+                            textAppearance: appMain.textAppearance
+                            previewAppearance: appMain.previewAppearance
 
                             createChatViewOpened: createChatView.opened
                             isPortraitMode: appMain.isPortraitMode
